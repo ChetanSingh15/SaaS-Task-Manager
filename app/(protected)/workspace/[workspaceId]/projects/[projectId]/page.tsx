@@ -7,15 +7,15 @@ import { CommentProps, ProjectProps, ProjectTaskProps } from '@/utils/types';
 import Link from 'next/link';
 import React from 'react'
 
-interface ProjectPageProps{
-  params: { workspaceId: string; projectId: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+interface ProjectPageProps {
+  params: Promise<{ workspaceId: string; projectId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 
 const ProjectPage = async (props: ProjectPageProps) => {
-  const { workspaceId , projectId } = props.params;
-  const { searchParams } = props;
+  const { workspaceId , projectId } = await props.params;
+  const searchParams = await props.searchParams;
 
 
   const { project, tasks, totalWorkspaceMembers, comments, activities } = await getProjectDetails(workspaceId, projectId)
@@ -23,7 +23,7 @@ const ProjectPage = async (props: ProjectPageProps) => {
   return (
     <div className='flex flex-col gap-6 pb-3'>
       <Tabs 
-      defaultValue={(searchParams?.view as string) || "dashboard"} 
+      defaultValue={(searchParams.view as string) || "dashboard"} 
       className='w-full'>
         <TabsList className='mb-4'>
           <Link href="?view=dashboard">
