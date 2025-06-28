@@ -35,23 +35,24 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Pencil } from "lucide-react";
 import { Calendar } from "../ui/calendar";
 import { taskStats } from "@/utils";
 import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
-// import { FileUpload } from "../file-upload";
-import { TaskPriority } from "@/lib/generated/prisma";
-import { createNewTask } from "@/app/actions/task";
-import { FileUpload } from "../file-upload";
+import { createNewTask, updateTask } from "@/app/actions/task";
+import { Task, TaskPriority, User } from "@/lib/generated/prisma";
 
 interface Props {
   project: ProjectProps;
+  task: Task & {
+    assignedTo: User;
+  };
 }
 
 export type TaskFormValues = z.infer<typeof taskFormSchema>;
 
-export const CreateTaskDialog = ({ project }: Props) => {
+export const EditTaskDialog = ({ task, project }: Props) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const workspaceId = useWorkspaceId();
@@ -60,14 +61,14 @@ export const CreateTaskDialog = ({ project }: Props) => {
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      status: "TODO",
-      dueDate: new Date(),
-      startDate: new Date(),
-      priority: "MEDIUM",
+      title: task?.title || "",
+      description: task.description || "",
+      status: task.status || "TODO",
+      dueDate: task.dueDate || new Date(),
+      startDate: task.startDate || new Date(),
+      priority: task.priority || "MEDIUM",
       attachments: [],
-      assigneeId: "",
+      assigneeId: task.assignedId || "",
     },
   });
 
@@ -75,9 +76,9 @@ export const CreateTaskDialog = ({ project }: Props) => {
     try {
       setPending(true);
 
-      await createNewTask(data, project.id, workspaceId! as string);
+      await updateTask(task.id, data, project.id, workspaceId! as string);
 
-      toast.success("New task created successfully");
+      toast.success("Task updated successfully");
       router.refresh();
       form.reset();
     } catch (error) {
@@ -91,12 +92,15 @@ export const CreateTaskDialog = ({ project }: Props) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Create Task</Button>
+        <Button variant={"outline"}>
+          <Pencil />
+          Edit Task
+        </Button>
       </DialogTrigger>
 
-      <DialogContent className="overflow-y-scroll max-h-[80vh]">
+      <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Task</DialogTitle>
+          <DialogTitle>Edit Task</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -310,26 +314,9 @@ export const CreateTaskDialog = ({ project }: Props) => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="attachments"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Attachments</FormLabel>
-                  <FormControl>
-                    <FileUpload
-                      value={field.value || []}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="flex justify-end space-x-2">
               <Button type="submit" disabled={pending}>
-                Submit
+                Save Changes
               </Button>
             </div>
           </form>
