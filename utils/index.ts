@@ -42,11 +42,11 @@ export const taskStats = [
     label: "COMPLETED",
     color: "bg-green-500",
   },
-  // {
-  //   status: TaskStatus.BLOCKED,
-  //   label: "BLOCKED",
-  //   color: "bg-red-500",
-  // },
+  {
+    status: TaskStatus.BLOCKED,
+    label: "BLOCKED",
+    color: "bg-red-500",
+  },
   {
     status: TaskStatus.BACKLOG,
     label: "BACKLOG",
@@ -60,7 +60,7 @@ export const taskStats = [
 ];
 
 export const taskStatusVariant = {
-  // [TaskStatus.BLOCKED]: "#ef4444",
+  [TaskStatus.BLOCKED]: "#ef4444",
   [TaskStatus.TODO]: "#6366f1",
   [TaskStatus.IN_PROGRESS]: "#f59e0b",
   [TaskStatus.COMPLETED]: "#10b981",
@@ -68,3 +68,4 @@ export const taskStatusVariant = {
   [TaskStatus.IN_REVIEW]: "#a855f7",
   default: "#6366f1",
 };
+
